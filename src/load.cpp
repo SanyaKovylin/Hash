@@ -22,35 +22,36 @@ int find(char *word);
 
 void load_table(const char* filename, char** storage){
 
-    alignas(64) *storage = (char*) calloc (1 << (14 + 8), sizeof(char));
-    int cnt = 0;
-    size_t len = BaseRead(filename, storage);
+    size_t len = BaseRead(filename, storage) >> 5 << 5;
     size_t ptr = 0;
-    while (ptr < len){
+
+    assert(buf != NULL);
+    HashNode *Nodes = (HashNode*) calloc (len >> 5 + 1, sizeof(HashNode));
+
+    while (ptr < len - 1){
         size_t word_len = 0;
 
         while (buf[ptr + word_len] > 0){
             word_len++;
         }
-        
-        HashNode *new_node = (HashNode*) calloc (1, sizeof(HashNode));
+
+        HashNode *new_node = Nodes + (ptr >> 5);
+        assert(new_node != NULL);
         new_node->word = buf + ptr;
         new_node->count = atoi(buf + ptr + word_len + 1);
-
+        memset(buf + ptr + word_len, 0, (32 - word_len)*sizeof(char));
         uint32_t index = xxh3_hash(buf + ptr);
         new_node->next = Table[index];
         Table[index] = new_node;
 
         ptr += 32;
     }
-
-
 }
 
 #undef buf
 
 void load_tests(char* Buffer, char** tests, size_t lenbuf){
-    
+
     size_t reader = 0;
 
     for (int i = 0; i < iterations && reader < lenbuf; i++){
@@ -73,7 +74,8 @@ size_t BaseRead (const char *src, char** Buffer) {
     stat (src, &st);
     size_t readlen = (size_t) st.st_size;
 
-    alignas(64) *Buffer = (char*) calloc (readlen + 1, sizeof (char));
+    *Buffer = (char*) aligned_alloc (64, readlen + 1 * sizeof (char));
+    assert(*Buffer != NULL);
 
     size_t lenbuf = read (fo, *Buffer, readlen);
     return lenbuf;
@@ -81,9 +83,9 @@ size_t BaseRead (const char *src, char** Buffer) {
 
 int find(char *word){
 
-    uint32_t hash = xxh3_hash(word);
+    uint32_t hash = nonaligned_hash(word);
     uint32_t index = hash % TABLE_SIZE;
-    
+
     HashNode *node = Table[index];
 
     while (node != NULL) {
@@ -115,7 +117,7 @@ void usage_case(const char* src){
     printf("%lld", dup);
 }
 
-void usage_case2(const char* src){
+void usage_case2(){
 
     int k = 0;
 
@@ -124,6 +126,6 @@ void usage_case2(const char* src){
         k = XXH3_avalanche32(i) % TABLE_SIZE;
         if (Table[k] && !find(Table[k]->word))
             puts("Fault");
-            
+
     }
 }

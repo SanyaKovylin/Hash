@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <stdio.h>
+#include <string.h>
 #include "hash.h"
 
 // Constants from XXH3 algorithm (adjusted for 32-bit)
@@ -40,24 +41,30 @@ uint32_t XXH3_hash32(uint32_t input, uint32_t seed){
 
     uint32_t keyed = lane ^ (SECRET[0] + seed);
     acc += keyed * PRIME32_2;
-    acc = (acc << 13) | (acc >> 19);  
-    
+    acc = (acc << 13) | (acc >> 19);
+
     acc ^= (acc >> 15);
     acc *= PRIME32_2;
     acc ^= (acc >> 13);
     acc *= PRIME32_3;
     acc ^= (acc >> 16);
-    
+
     return acc;
 }
 
 uint32_t XXH3_avalanche32(uint32_t input) {
-    uint32_t h32 = input + PRIME32_4;
-    h32 = xxh3_hash((char*) &h32);
-    return h32;
+    uint32_t hash = input + PRIME32_4;
+    hash = nonaligned_hash((char*) &hash);
+    return hash;
 }
 
-uint32_t xxh3_hash(const char *str){
+uint32_t nonaligned_hash(char* str){
+   char word[32] = {};
+   strcpy(str, word);
+   return xxh3_hash(word);
+}
+
+uint32_t xxh3_hash(const char *str){ //use 32 chars
 
     uint32_t hash = PRIME32_4;
     alignas(64) uint32_t list[8] = {};
@@ -65,6 +72,6 @@ uint32_t xxh3_hash(const char *str){
     __m256i word  = _mm256_load_epi32(str);
     word = XXH32_avalanche(word);
     _mm256_store_epi32(list, word);
-    hash = (hash*hash*list[0] + hash*list[2] + list[3]) % TABLE_SIZE + list[4] + list[5]+ list[6]+ list[7];
+    hash = (PRIME32_1*list[0] + hash*list[1] + PRIME32_2*list[2]) % TABLE_SIZE + list[3] + list[4]+ list[5]+ list[6] + list[7];
     return hash % TABLE_SIZE;
 }

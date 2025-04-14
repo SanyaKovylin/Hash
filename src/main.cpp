@@ -6,15 +6,15 @@
 
 int main() {
 
-    build_hash_table("txtsrc/input.txt");
-    write_output("table/output.txt");
-    free_table();
+    // build_hash_table("txtsrc/input.txt");
+    // write_output("table/output.txt");
+    // free_table();
 
 
     char *WordStore = NULL;
-    // load_table("table/output.txt");
-    // puts("1");
-    // usage_case2("txtsrc/test2.txt");
+    load_table("table/output.txt", &WordStore);
+    puts("1");
+    usage_case2();
 
     return 0;
 }

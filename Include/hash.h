@@ -22,6 +22,7 @@ uint32_t xxh3_hash(const char *str);
 typedef struct HashNode {
     char *word;
     int count;
+    int wordlen;
     struct HashNode *next;
 } HashNode;
 

@@ -39,28 +39,28 @@
     39 0000001C C5FDD7C2                    vpmovmskb eax, ymm2
     40 00000020 09D0                        or eax, edx
     41 00000022 39D0                        cmp eax, edx
-    42 00000024 7505                        jne .not_equal
+    42 00000024 7503                        jne .not_equal
     43                                  
     44                                  .equal:
     45 00000026 4831C0                     xor rax, rax
-    46 00000029 EB00                       jmp .done
+    46                                  
     47                                  .not_equal:
     48                                      ; mov rax, 1
     49                                  
     50                                  .done:
-    51 0000002B 5D                          pop rbp
-    52 0000002C C3                          ret
+    51 00000029 5D                          pop rbp
+    52 0000002A C3                          ret
     53                                  
     54                                  
     55                                  
     56                                  mystrlen:
-    57 0000002D 48C7C1FFFFFFFF              mov rcx, -1
-    58 00000034 30C0                        xor al, al
-    59 00000036 F2AE                        repne scasb
-    60 00000038 48F7D1                      not rcx
-    61 0000003B 48FFC9                      dec rcx
-    62 0000003E 4889C8                      mov rax, rcx
-    63 00000041 C3                          ret
+    57 0000002B 48C7C1FFFFFFFF              mov rcx, -1
+    58 00000032 30C0                        xor al, al
+    59 00000034 F2AE                        repne scasb
+    60 00000036 48F7D1                      not rcx
+    61 00000039 48FFC9                      dec rcx
+    62 0000003C 4889C8                      mov rax, rcx
+    63 0000003F C3                          ret
     64                                  
     65                                  section .data
     66 00000000 0000000000000000        RetOffs         dq  0

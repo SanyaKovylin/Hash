@@ -43,7 +43,7 @@ mystrcmp:
 
 .equal:
    xor rax, rax
-   jmp .done
+
 .not_equal:
     ; mov rax, 1
 

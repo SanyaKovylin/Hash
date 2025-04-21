@@ -10,7 +10,7 @@
 #include "hash.h"
 #include "process.h"
 
-#define iterations 1000
+#define iterations 1000000
 
 HashNode *Table[TABLE_SIZE] = {NULL};
 
@@ -38,6 +38,7 @@ void load_table(const char* filename, char** storage, size_t* len){
         assert(new_node != NULL);
         new_node->word = buf + ptr;
         new_node->count = atoi(buf + ptr + word_len + 1);
+        new_node->wordlen = word_len;
 
         memset(buf + ptr + word_len, 0, (32 - word_len)*sizeof(char));
         uint32_t index = HASH1(buf + ptr);
@@ -68,9 +69,7 @@ void prev_load_table(const char* filename, char** storage, size_t* len){
 
         while (buf[ptr + word_len] > 0){
             word_len++;
-            printf("%d", word_len);
         }
-        printf("%d", ptr);
         HashNode *new_node = Nodes + (ptr >> 5);
         assert(new_node != NULL);
         new_node->word = buf + ptr;
@@ -83,7 +82,9 @@ void prev_load_table(const char* filename, char** storage, size_t* len){
         ptr += 32;
     }
 }
+
 #undef buf
+
 size_t BaseRead (const char *src, char** Buffer) {
 
     assert(Buffer != NULL);
@@ -104,7 +105,6 @@ int find(char *word){
 
     uint32_t index = HASH2(word);
     HashNode *node = Table[index];
-
     while (node != NULL) {
         if (STRCMP(word, node->word) == 0) {
             return node->count;

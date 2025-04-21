@@ -60,13 +60,13 @@ uint32_t XXH3_avalanche32(uint32_t h32) {
     h32 *= PRIME32_3;
     h32 ^= h32 >> 16;
 
-    return h32;
+    return h32 % TABLE_SIZE;
 }
 
 uint32_t slowhash(char* word){
     int hash = 0;
-    while (*word){
-        hash = (hash) *5 + *word;
+    while (isdigit(*word)){
+        hash = (hash)*5 + *(word++);
     }
     return XXH3_avalanche32(hash);
 }

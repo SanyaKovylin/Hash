@@ -7,8 +7,8 @@ ASM_FLAGS = -f elf64
 CC_FLAGS = -g -O3 -mavx512f -mavx512vl -I Include
 # CC_FLAGS += -fsanitize=address -lasan# -I /lib64/gcc/x86_64-pc-linux-gnu/14.2.1/include/sanitizer
 
-CC_FLAGS += -D NOSTRCMP
-CC_FLAGS += -D NOHASH
+# CC_FLAGS += -D NOSTRCMP
+# CC_FLAGS += -D NOHASH
 CC_FLAGS += -D NOLOAD
 
 Sources =  $(wildcard $(Source)/*.cpp)

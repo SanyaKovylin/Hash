@@ -2,7 +2,7 @@
 #include <immintrin.h>
 #include <ctype.h>
 
-#define TABLE_SIZE 65536/2
+#define TABLE_SIZE 1024
 
 __m256i XXH32_avalanche(__m256i h32);
 uint32_t XXH3_avalanche32(uint32_t h32);

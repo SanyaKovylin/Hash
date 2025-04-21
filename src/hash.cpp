@@ -71,7 +71,8 @@ uint32_t xxh3_hash(const char *str){ //use 32 chars
 
     __m256i word  = _mm256_load_epi32(str);
     word = XXH32_avalanche(word);
+    _mm256_mul_epi32(word, _mm256_set_epi32(PRIME32_1, PRIME32_4, PRIME32_2, 1,1,1,1,1));
     _mm256_store_epi32(list, word);
-    hash = (PRIME32_1*list[0] + PRIME32_4*list[1] + PRIME32_2*list[2]) % TABLE_SIZE + list[3] + list[4]+ list[5]+ list[6] + list[7];
+    hash = list[0] + list[1] + list[2] + list[3] + list[4]+ list[5]+ list[6] + list[7];
     return hash % TABLE_SIZE;
 }

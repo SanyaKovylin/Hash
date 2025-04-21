@@ -10,7 +10,7 @@
 #include "hash.h"
 #include "process.h"
 
-#define iterations 100
+#define iterations 100000000
 
 
 HashNode *Table[TABLE_SIZE] = {NULL};
@@ -51,7 +51,9 @@ void load_table(const char* filename, char** storage, size_t* len){
         last = index;
         ptr += 32;
     }
+    Table[last] = Nodes + ((ptr >> 5) - 1);
     Nodes->next = NULL;
+
 }
 
 #undef buf
@@ -133,9 +135,15 @@ void usage_case2(){
 }
 
 void usage_case3(char* buffer, size_t len){
-
-    for (int i = 0;i < iterations && i < (len >> 5); i++){
-        if (!find(buffer + i*32))
+    size_t cnt = 0;
+    for (int i = 0;i < iterations; i++){
+        int x = find(buffer + (i % (len >> 5))*32);
+        if (!x){
             puts("Abort");
+            printf("%s\n", buffer + (i % (len >> 5))*32);
+        }
+        cnt += x;
+
     }
+    printf("%d", cnt);
 }

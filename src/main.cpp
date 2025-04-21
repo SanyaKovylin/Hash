@@ -10,7 +10,6 @@ int main() {
     // write_output("table/output.txt");
     // free_table();
 
-
     char *WordStore = NULL;
     size_t len = 0;
     load_table("table/output.txt", &WordStore, &len);

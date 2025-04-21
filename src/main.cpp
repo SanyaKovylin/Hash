@@ -6,15 +6,18 @@
 
 int main() {
 
-    // build_hash_table("txtsrc/input.txt");
-    // write_output("table/output.txt");
-    // free_table();
+//     char w[32] = {
+//         'D','e','e','p' ,'v','a','l','l'   ,'e','y','f','o',  'r','e','s','t',  'e','d',0,0,  0,0,0,0,  0,0,0,0,  0,0,0,0
+//     };
+//
+//     char e[] = "Deepvalleyforested";
+//     printf("%d", STRCMP(e,w));
 
     char *WordStore = NULL;
     size_t len = 0;
-    load_table("table/output.txt", &WordStore, &len);
-    // puts(WordStore);
-    usage_case3(WordStore, len);
+    LOAD("table/output.txt", &WordStore, &len);
+    puts("Load finished");
+    usage_case(WordStore, len);
 
     return 0;
 }

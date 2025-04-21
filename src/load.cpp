@@ -10,8 +10,7 @@
 #include "hash.h"
 #include "process.h"
 
-#define iterations 100000000
-
+#define iterations 1000
 
 HashNode *Table[TABLE_SIZE] = {NULL};
 
@@ -41,7 +40,7 @@ void load_table(const char* filename, char** storage, size_t* len){
         new_node->count = atoi(buf + ptr + word_len + 1);
 
         memset(buf + ptr + word_len, 0, (32 - word_len)*sizeof(char));
-        uint32_t index = xxh3_hash(buf + ptr);
+        uint32_t index = HASH1(buf + ptr);
 
         if (index != last)
             Table[last] = new_node - 1;
@@ -56,23 +55,35 @@ void load_table(const char* filename, char** storage, size_t* len){
 
 }
 
-#undef buf
+void prev_load_table(const char* filename, char** storage, size_t* len){
 
-void load_tests(char* Buffer, char** tests, size_t lenbuf){
+    *len = BaseRead(filename, storage) >> 5 << 5;
+    size_t ptr = 0;
 
-    size_t reader = 0;
+    assert(buf != NULL);
+    HashNode *Nodes = (HashNode*) calloc ((*len >> 5) + 1, sizeof(HashNode));
+    puts("started");
+    while (ptr < *len - 1){
+        size_t word_len = 0;
 
-    for (int i = 0; i < iterations && reader < lenbuf; i++){
+        while (buf[ptr + word_len] > 0){
+            word_len++;
+            printf("%d", word_len);
+        }
+        printf("%d", ptr);
+        HashNode *new_node = Nodes + (ptr >> 5);
+        assert(new_node != NULL);
+        new_node->word = buf + ptr;
+        new_node->count = atoi(buf + ptr + word_len + 1);
+        memset(buf + ptr + word_len, 0, (32 - word_len)*sizeof(char));
+        uint32_t index = HASH1(buf + ptr);
+        new_node->next = Table[index];
+        Table[index] = new_node;
 
-        size_t wrdptr = 0;
-        while (reader + wrdptr < lenbuf && isalpha(Buffer[reader + wrdptr])) wrdptr++;
-        Buffer[reader + wrdptr] = 0;
-        tests[i] = Buffer + reader;
-        while (reader + wrdptr < lenbuf && !isalpha(Buffer[reader + wrdptr])) wrdptr++;
-        reader += wrdptr;
+        ptr += 32;
     }
 }
-
+#undef buf
 size_t BaseRead (const char *src, char** Buffer) {
 
     assert(Buffer != NULL);
@@ -91,11 +102,11 @@ size_t BaseRead (const char *src, char** Buffer) {
 
 int find(char *word){
 
-    uint32_t index = nonaligned_hash(word);
+    uint32_t index = HASH2(word);
     HashNode *node = Table[index];
 
     while (node != NULL) {
-        if (strcmp(node->word, word) == 0) {
+        if (STRCMP(word, node->word) == 0) {
             return node->count;
         }
         node = node->next;
@@ -104,43 +115,14 @@ int find(char *word){
     return 0;
 }
 
-void usage_case(const char* src){
-
-    char* Buffer = NULL;
-    size_t lenbuf = BaseRead(src, &Buffer);
-    char* test[iterations] = {};
-
-    load_tests(Buffer, test, lenbuf);
-
-    long long dup = 0;
-
-    for (int i = 0; i < iterations && test[i]; i++){
-
-        dup += find(test[i]);
-    }
-    printf("%lld", dup);
-}
-
-void usage_case2(){
-
-    int k = 0;
-
-    for (int i = 0; i < iterations; i++){
-
-        k = XXH3_avalanche32(i) % TABLE_SIZE;
-        if (Table[k] && !find(Table[k]->word))
-            puts("Fault");
-
-    }
-}
-
-void usage_case3(char* buffer, size_t len){
+void usage_case(char* buffer, size_t len){
     size_t cnt = 0;
     for (int i = 0;i < iterations; i++){
         int x = find(buffer + (i % (len >> 5))*32);
         if (!x){
             puts("Abort");
             printf("%s\n", buffer + (i % (len >> 5))*32);
+
         }
         cnt += x;
 

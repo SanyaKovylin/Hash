@@ -52,10 +52,23 @@ uint32_t XXH3_hash32(uint32_t input, uint32_t seed){
     return acc;
 }
 
-uint32_t XXH3_avalanche32(uint32_t input) {
-    uint32_t hash = input + PRIME32_4;
-    hash = nonaligned_hash((char*) &hash);
-    return hash;
+uint32_t XXH3_avalanche32(uint32_t h32) {
+
+    h32 ^= h32 >> 15;
+    h32 *= PRIME32_2;
+    h32 ^= h32 >> 13;
+    h32 *= PRIME32_3;
+    h32 ^= h32 >> 16;
+
+    return h32;
+}
+
+uint32_t slowhash(char* word){
+    int hash = 0;
+    while (*word){
+        hash = (hash) *5 + *word;
+    }
+    return XXH3_avalanche32(hash);
 }
 
 uint32_t nonaligned_hash(char* str){

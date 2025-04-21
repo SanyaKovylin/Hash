@@ -14,7 +14,7 @@ HashNode *hashTable[TABLE_SIZE] = {NULL};
 
 void process_word(char *word){
 
-    uint32_t hash = nonaligned_hash(word);
+    uint32_t hash = HASH2(word);
     uint32_t index = hash;
 
     HashNode *node = hashTable[index];

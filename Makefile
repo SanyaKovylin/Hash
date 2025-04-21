@@ -34,7 +34,7 @@ $(Build):
 asm: $(Build)
 	$(ASM) $(ASM_FLAGS) -l a.lst $(Source)/printf.s -o $(Build)/myprintf.o
 
-run:
+run: all
 	$(Build)/$(Exe)
 
 clean:

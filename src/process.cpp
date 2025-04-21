@@ -12,10 +12,10 @@
 
 HashNode *hashTable[TABLE_SIZE] = {NULL};
 
-void process_word(const char *word){
-    
-    uint32_t hash = xxh3_hash(word);
-    uint32_t index = hash % TABLE_SIZE;
+void process_word(char *word){
+
+    uint32_t hash = nonaligned_hash(word);
+    uint32_t index = hash;
 
     HashNode *node = hashTable[index];
     while (node) {
@@ -34,7 +34,7 @@ void process_word(const char *word){
 }
 
 void build_hash_table(const char *filename){
-    
+
     size_t mx = 0;
     size_t long_cnt = 0;
     FILE *file = fopen(filename, "r");
@@ -52,14 +52,14 @@ void build_hash_table(const char *filename){
 }
 
 void write_output(const char *filename){
-    
+
     FILE *file = fopen(filename, "w");
     char cell[32] = {};
     for (int i = 0; i < TABLE_SIZE; i++) {
         HashNode *node = hashTable[i];
         while (node) {
             memset(cell, 0, 32 * sizeof(char));
-            sprintf(cell, "%s%c%d", node->word, 0, node->count);
+            sprintf(cell, "%s%c%d%c%d%c%d", node->word, 0, node->count, 0, nonaligned_hash(node->word),i);
             for (int k = 0; k < 32; k++){
                 fputc(cell[k], file);
             }

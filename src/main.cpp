@@ -12,9 +12,10 @@ int main() {
 
 
     char *WordStore = NULL;
-    load_table("table/output.txt", &WordStore);
-    puts("1");
-    usage_case2();
+    size_t len = 0;
+    load_table("table/output.txt", &WordStore, &len);
+    // puts(WordStore);
+    usage_case3(WordStore, len);
 
     return 0;
 }

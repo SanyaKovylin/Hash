@@ -3,7 +3,6 @@
 #include <stdbool.h>
 #include <string.h>
 #include <unistd.h>
-// #include <errno.h>
 #include <assert.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -11,7 +10,7 @@
 #include "hash.h"
 #include "process.h"
 
-#define iterations 1000000
+#define iterations 100
 
 
 HashNode *Table[TABLE_SIZE] = {NULL};
@@ -20,15 +19,16 @@ int find(char *word);
 
 #define buf (*storage)
 
-void load_table(const char* filename, char** storage){
+void load_table(const char* filename, char** storage, size_t* len){
 
-    size_t len = BaseRead(filename, storage) >> 5 << 5;
+    *len = BaseRead(filename, storage) >> 5 << 5;
     size_t ptr = 0;
 
     assert(buf != NULL);
-    HashNode *Nodes = (HashNode*) calloc (len >> 5 + 1, sizeof(HashNode));
+    HashNode *Nodes = (HashNode*) calloc ((*len >> 5) + 1, sizeof(HashNode));
 
-    while (ptr < len - 1){
+    size_t last = 0;
+    while (ptr < *len - 1){
         size_t word_len = 0;
 
         while (buf[ptr + word_len] > 0){
@@ -39,13 +39,19 @@ void load_table(const char* filename, char** storage){
         assert(new_node != NULL);
         new_node->word = buf + ptr;
         new_node->count = atoi(buf + ptr + word_len + 1);
+
         memset(buf + ptr + word_len, 0, (32 - word_len)*sizeof(char));
         uint32_t index = xxh3_hash(buf + ptr);
-        new_node->next = Table[index];
-        Table[index] = new_node;
 
+        if (index != last)
+            Table[last] = new_node - 1;
+        else
+            new_node->next = new_node - 1;
+
+        last = index;
         ptr += 32;
     }
+    Nodes->next = NULL;
 }
 
 #undef buf
@@ -83,19 +89,15 @@ size_t BaseRead (const char *src, char** Buffer) {
 
 int find(char *word){
 
-    uint32_t hash = nonaligned_hash(word);
-    uint32_t index = hash % TABLE_SIZE;
-
+    uint32_t index = nonaligned_hash(word);
     HashNode *node = Table[index];
 
     while (node != NULL) {
         if (strcmp(node->word, word) == 0) {
             return node->count;
         }
-        // printf("%s %d %s\n", node->word, index, word);
         node = node->next;
     }
-    // puts("");
 
     return 0;
 }
@@ -127,5 +129,13 @@ void usage_case2(){
         if (Table[k] && !find(Table[k]->word))
             puts("Fault");
 
+    }
+}
+
+void usage_case3(char* buffer, size_t len){
+
+    for (int i = 0;i < iterations && i < (len >> 5); i++){
+        if (!find(buffer + i*32))
+            puts("Abort");
     }
 }

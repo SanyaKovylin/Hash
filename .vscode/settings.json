@@ -1,10 +1,38 @@
 {
     "cSpell.words": [
+        "alignas",
+        "archlinux",
+        "Infostart",
         "lasan",
+        "mathbb",
         "mavx",
         "myprintf",
+        "mystrcmp",
         "nasm",
+        "NOALIGN",
+        "NOHASH",
+        "NOSTRCMP",
+        "NOSTRCPY",
+        "NOФДШ",
+        "perfstat",
         "srai",
-        "wrdptr"
-    ]
+        "strcmp",
+        "strncmp",
+        "txtsrc",
+        "vmovdqu",
+        "vpcmpeqb",
+        "vpmovmskb",
+        "wrdptr",
+        "xchg",
+        "интринсиков",
+        "ИТМО",
+        "профайлером",
+        "раскомментировать",
+        "Толкиен",
+        "Толкина"
+    ],
+    "files.associations": {
+        "*.h": "c",
+        "cstdint": "cpp"
+    }
 }

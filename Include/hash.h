@@ -2,21 +2,20 @@
 #include <immintrin.h>
 #include <ctype.h>
 
-#define TABLE_SIZE 1024
+#define TABLE_SIZE 1009
 
-uint32_t slowhash(char* word);
-__m256i XXH32_avalanche(__m256i h32);
-uint32_t XXH3_avalanche32(uint32_t h32);
-uint32_t XXH3_hash32(uint32_t input, uint32_t seed);
-uint32_t nonaligned_hash(char* str);
-uint32_t xxh3_hash(const char *str);
+uint32_t crc32(void *data, size_t len);
+uint32_t hash_crc32(char *s);
+uint32_t asm_hash_crc32(const void *data);
+uint32_t nonaligned(const char* s);
+uint32_t asm_hash_crc32_simd(__m256i data);
 
 #ifdef NOHASH
-    #define HASH1(a) slowhash(a)
-    #define HASH2(a) slowhash(a)
+    #define HASH1(a) hash_crc32(a)
+    #define HASH2(a) nonaligned1(a)
 #else
-    #define HASH1(a) xxh3_hash(a)
-    #define HASH2(a) nonaligned_hash(a)
+    #define HASH1(a) asm_hash_crc32(a)
+    #define HASH2(a) nonaligned(a)
 #endif
 
 typedef struct HashNode {
@@ -25,4 +24,9 @@ typedef struct HashNode {
     int wordlen;
     struct HashNode *next;
 } HashNode;
+
+typedef struct HashNodeSIMD {
+    __m256i word;
+    struct HashNodeSIMD *next;
+} HashNodeSIMD;
 

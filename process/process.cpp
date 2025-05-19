@@ -4,13 +4,25 @@
 #include "hash.h"
 #include "process.h"
 
-// Constants from XXH3 algorithm
-#define PRIME32_1 0x9E3779B1U
-#define PRIME32_2 0x85EBCA77U
-#define PRIME32_3 0xC2B2AE3DU
-#define PRIME32_5 0x165667B1U
-
 HashNode *hashTable[TABLE_SIZE] = {NULL};
+
+uint32_t nonaligned1(const char* s){
+    alignas(64) char word[32] = {};
+    strcpy(word, s);
+    return hash_crc32(word);
+}
+
+uint32_t nonaligned(const char* s){
+    alignas(64) char word[64] = {};
+    strcpy(word, s);
+    return asm_hash_crc32(word);
+}
+
+uint32_t nonaligned2(const char* s){
+    alignas(32) char word[32] = {};
+    strcpy(word, s);
+    return asm_hash_crc32_simd(_mm256_load_epi32(word));
+}
 
 void process_word(char *word){
 
@@ -39,15 +51,17 @@ void build_hash_table(const char *filename){
     size_t long_cnt = 0;
     FILE *file = fopen(filename, "r");
     char buffer[1024];
+    int words = 0;
     while (fscanf(file, "%1023s ", buffer) == 1){
         proc(buffer);
         process_word(buffer);
         if (strlen(buffer) > mx){
             mx = strlen(buffer);
         }
+        words++;
         if (strlen(buffer) > 12) long_cnt++;
     }
-    printf("MaxLength: %ld, %ld\n", mx, long_cnt);
+    printf("Number of words: %ld, MaxLength: %ld, Number of long words: %ld\n",words, mx, long_cnt);
     fclose(file);
 }
 
@@ -60,7 +74,8 @@ void write_output(const char *filename){
         HashNode *node = hashTable[i];
         while (node) {
             memset(cell, 0, 32 * sizeof(char));
-            sprintf(cell, "%s%c%d", node->word, 0, node->count);
+            sprintf(cell, "%s%c", node->word, 0);
+            *(uint32_t*)(cell + strlen(node->word) + 1) = node->count;
             for (int k = 0; k < 32; k++){
                 fputc(cell[k], file);
             }
@@ -69,7 +84,7 @@ void write_output(const char *filename){
         }
     }
 
-    printf("LoadFactor = %g, cnt = %d, size = %d\n",
+    printf("LoadFactor = %g, cnt distinct = %d, size = %d\n",
             ((float) (cnt - TABLE_SIZE)) / (float) TABLE_SIZE, cnt, TABLE_SIZE);
 
     fclose(file);
